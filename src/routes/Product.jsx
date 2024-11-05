@@ -1,176 +1,79 @@
-import React, { useEffect, useState } from 'react';
+// ProductManagement.js
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import AddProductForm from '../components/AddProductForm';
+import EditProductForm from '../components/EditProduct';
+import ProductList from '../components/ProductList';
+import Dropdown from '../components/Dropdown';
+import DeleteProduct from '../components/DeleteProductForm';
+function ProductManagement() {
+    const [products, setProducts] = useState([]);
+    const [editingProduct, setEditingProduct] = useState(null);
+    const [formMode, setFormMode] = useState('Add Product'); // 'add' or 'edit' mode
 
-function AddProductForm() {
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
-    
+  
 
-
-    const [formData, setFormData] = useState({
-        productName: '',
-        description: '',
-        price: '',
-        category: '',
-        stockQuantity: '',
-        sku: '',
-        ingredients: '',
-        nutritionalInfo: '',
-        expirationDate: '',
-        imageUrl: '',
-        isVegan: false,
-        isGlutenFree: false
-    });
-    useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const response = await axios.get("http://localhost:5000/api/categories");
-                setCategories(response.data.data);
-            } catch (error) {
-                console.error("Error fetching categories:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchCategories();
-    }, []);
-
-    const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setFormData({
-            ...formData,
-            [name]: type === 'checkbox' ? checked : value
-        });
+    const addProduct = (product) => {
+        setProducts([...products, product]);
+        setFormMode('add'); // Switch back to add mode after adding a product
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        console.log('Form data submitted:', formData);
-        const productData = {
-            productName: formData.productName,
-            description: formData.description,
-            price: parseFloat(formData.price),
-            category: formData.category,
-            stockQuantity: parseInt(formData.stockQuantity, 10),
-            sku: formData.sku,
-            ingredients: formData.ingredients,
-            nutritionalInfo: formData.nutritionalInfo,
-            expirationDate: formData.expirationDate,
-            imageUrl: formData.imageUrl,
-            isVegan: formData.isVegan,
-            isGlutenFree: formData.isGlutenFree,
-        };
+    const updateProduct = (updatedProduct) => {
+        setProducts(products.map((product) => (product._id === updatedProduct._id ? updatedProduct : product)));
+        setEditingProduct(null);
+        setFormMode('add'); // Switch back to add mode after editing
+    };
 
+    const deleteProduct = async (productId) => {
         try {
-            const response = await fetch('http://localhost:5000/api/products', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(productData),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log('Product added successfully:', data);
+            await axios.delete(`http://localhost:5000/api/products/${productId}`);
+            setProducts(products.filter((product) => product._id !== productId));
         } catch (error) {
-            console.error('Error adding product:', error);
+            console.error('Error deleting product:', error);
         }
+    };
 
+    const handleEditProduct = (product) => {
+        setEditingProduct(product);
+        setFormMode('edit');
+    };
 
+    const handleModeChange = (e) => {
+        setFormMode(e);
     };
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-lg mx-auto p-4 shadow-md rounded-md">
-            <h2 className="text-2xl font-bold mb-4">Add New Food Product</h2>
+        <>
+            <Dropdown
+                options={['Add Product', 'Edit Product', 'Delete Product']}
+                selectedOption={formMode}
+                onChange={handleModeChange}
+            />
+            {
+                formMode == 'Add Product' 
 
-            <label>
-                Product Name:
-                <input type="text" name="productName" value={formData.productName} onChange={handleChange} className="block w-full mb-2 p-2 border rounded text-black" required />
-            </label>
+                && 
 
-            <label>
-                Description:
-                <textarea name="description" value={formData.description} onChange={handleChange} className="block w-full mb-2 p-2 border rounded text-black" />
-            </label>
-            <label>
-                Category:
-                {loading ? (
-                    <div className="mb-2 text-gray-500">Loading categories...</div>
-                ) : (
-                    <select
-                        name="category"
-                        value={formData.category}
-                        onChange={handleChange}
-                        className="block w-full mb-2 p-2 border rounded text-black"
-                        required
-                    >
-                        <option value="">Select a category</option>
-                        {categories.map((category) => (
-                            <option key={category._id} value={category._id}>
-                                {category.name}
-                            </option>
-                        ))}
-                    </select>
-                )}
-            </label>
+                <AddProductForm></AddProductForm>
+            }
 
-            <label>
-                Price:
-                <input type="number" name="price" value={formData.price} onChange={handleChange} className="block w-full mb-2 p-2 border rounded text-black" required />
-            </label>
+            {
+                formMode == 'Edit Product'
 
-            <label>
-                Category:
-                <input type="text" name="category" value={formData.category} onChange={handleChange} className="block w-full mb-2 p-2 border rounded text-black" required />
-            </label>
+                && 
 
-            <label>
-                Stock Quantity:
-                <input type="number" name="stockQuantity" value={formData.stockQuantity} onChange={handleChange} className="block w-full mb-2 p-2 border rounded text-black" required />
-            </label>
+                <EditProductForm></EditProductForm>
+            }
 
-            <label>
-                SKU:
-                <input type="text" name="sku" value={formData.sku} onChange={handleChange} className="block w-full mb-2 p-2 border rounded text-black" required />
-            </label>
+            {
+                formMode == 'Delete Product'
 
-            <label>
-                Ingredients:
-                <textarea name="ingredients" value={formData.ingredients} onChange={handleChange} className="block w-full mb-2 p-2 border rounded text-black" />
-            </label>
+                && 
 
-            <label>
-                Nutritional Information:
-                <textarea name="nutritionalInfo" value={formData.nutritionalInfo} onChange={handleChange} className="block w-full mb-2 p-2 border rounded text-black" />
-            </label>
-
-            <label>
-                Expiration Date:
-                <input type="date" name="expirationDate" value={formData.expirationDate} onChange={handleChange} className="block w-full mb-2 p-2 border rounded text-black" />
-            </label>
-
-            <label>
-                Image URL:
-                <input type="url" name="imageUrl" value={formData.imageUrl} onChange={handleChange} className="block w-full mb-2 p-2 border rounded text-black" />
-            </label>
-
-            <label className="flex items-center mb-2">
-                <input type="checkbox" name="isVegan" checked={formData.isVegan} onChange={handleChange} className="mr-2" />
-                Is Vegan
-            </label>
-
-            <label className="flex items-center mb-4">
-                <input type="checkbox" name="isGlutenFree" checked={formData.isGlutenFree} onChange={handleChange} className="mr-2" />
-                Is Gluten-Free
-            </label>
-
-            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Add Product</button>
-        </form>
+                <DeleteProduct></DeleteProduct>
+            }
+        </>
     );
 }
 
-export default AddProductForm;
+export default ProductManagement;
