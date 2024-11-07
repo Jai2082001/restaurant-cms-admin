@@ -76,6 +76,7 @@ function AddProductForm() {
 
             const data = await response.json();
             console.log('Product added successfully:', data);
+            alert("Product added Successfully")
         } catch (error) {
             console.error('Error adding product:', error);
         }

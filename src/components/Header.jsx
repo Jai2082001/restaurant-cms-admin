@@ -28,7 +28,7 @@ const Header = ({ toggleSidebar, isDarkMode, toggleDarkMode }) => {
               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
             <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
-              JD
+              Admin
             </div>
           </div>
         </div>
