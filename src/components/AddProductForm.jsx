@@ -95,6 +95,8 @@ function AddProductForm() {
             productData.append('image', formData.imageFile);
         }
 
+
+        
         try {
             const response = await axios.post('http://localhost:5000/api/products', productData, {
                 headers: {
