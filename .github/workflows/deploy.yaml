@@ -1,0 +1,36 @@
+name: CI/CD Pipeline with Tests and Deployment
+
+on:
+  push:
+    branches:
+      - main  # Trigger only on push to the main branch
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # Run tests job
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # Set your Node.js version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test  # Adjust this command if you're using a different testing framework
+
+  # Deploy to Netlify only if tests pass
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Trigger Netlify Deployment
+        run: curl -X POST -d {} https://api.netlify.com/build_hooks/67410f332e1a4d7430f46172
