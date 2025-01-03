@@ -31,6 +31,8 @@ const SocialEdit = () => {
     }
 
     const twitterHandler = async () => {
+
+        console.log('run');
         const response = await axios.post(`${process.env.REACT_APP_BACK_END_LINK}/api/tweet`, {
             tweetText
         });
